@@ -60,6 +60,9 @@ set(PROJECT_VERSION_TYPE "final" CACHE STRING "Version type.")
 set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 set(PROJECT_VERSION_STRING ${PROJECT_VERSION}-${PROJECT_VERSION_TYPE})
 
+set(OpenCV_DIR "I:/opencv-4.9.0/build/install/x64/mingw/lib")
+find_package(OpenCV REQUIRED)
+
 # Supported languages include C, CXX (i.e. C++), CUDA, OBJC (i.e. Objective-C), OBJCXX, Fortran, HIP, ISPC, and ASM. By default C and CXX are enabled if no language options are given.
 # Specify language NONE, or use the LANGUAGES keyword and list no languages, to skip enabling any languages.
 set(PROJECT_LANGUAGES CXX)
@@ -90,7 +93,7 @@ project(
     DESCRIPTION ${PROJECT_DESCRIPTION}
     HOMEPAGE_URL ${PROJECT_HOMEPAGE_URL}
     VERSION ${PROJECT_VERSION}
-    )
+)
 
 # ------ PROJECT CONFIG ------
 include(project-setting)
@@ -133,11 +136,17 @@ if(NOT PROJECT_MAIN_TYPE STREQUAL "stl")
     set(CMAKE_AUTORCC ON)
 endif()
 
+set(FUNCTIONAL_GROUP1 video)
+set(FUNCTIONAL_GROUP2 video)
+set(FUNCTIONAL_GROUP3 video)
+set(FUNCTIONAL_GROUP4 video)
+
 set(SUFFIX_EXTRA *.in)
 set(SUFFIX_HPPHEADER *.hpp)
 set(SUFFIX_IPPHEADER *.ipp)
 set(SUFFIX_INLHEADER *.inl)
 set(SUFFIX_SOURCE *.cpp)
+set(SUFFIX_HHEADER *.h)
 set(SUFFIX_CONFIG *.json)
 
 if(PROJECT_MAIN_TYPE STREQUAL "qtwidget")
@@ -148,12 +157,28 @@ elseif(PROJECT_MAIN_TYPE STREQUAL "qtquick")
 endif()
 
 file(GLOB PRECOMPILED precompiled/pch.hpp)
+
+# 搜索所有的
 file(GLOB HEADERS
         source/${SUFFIX_HPPHEADER}
         source/${SUFFIX_IPPHEADER}
         source/${SUFFIX_INLHEADER}
 )
-file(GLOB SOURCES source/${SUFFIX_SOURCE})
+
+# 添加到 source的 .cpp 下的文件都被包括在 SOURCES 中
+file(GLOB SOURCES
+    source/${SUFFIX_SOURCE}
+)
+
+file(GLOB MODULE_HEADERS
+    # ADD
+    source/${FUNCTIONAL_GROUP1}/${SUFFIX_HHEADER}
+)
+
+file(GLOB MODULE_SOURCES
+    # ADD
+    source/${FUNCTIONAL_GROUP1}/${SUFFIX_SOURCE}
+)
 
 #file(GLOB EXAMPLES
 #     source/examples/${SUFFIX_HPPHEADER}
@@ -218,16 +243,20 @@ file(GLOB SOURCESFILE
     ${CONFIGFILE}
     ${PRECOMPILED}
     ${EXAMPLES}
-    )
+    ${MODULE_HEADERS}
+    ${MODULE_SOURCES}
+)
+
 
 source_group("PrecompiledHeaders"  FILES ${PRECOMPILED})
 source_group("Utilities"  FILES ${UTILS})
 source_group("Entry Point (Main)"   FILES ${MAIN_ENTRY_POINT})
-source_group("Base"   FILES ${HEADERS} ${SOURCES})
 source_group("UI"     FILES ${UI_SOURCE})
 source_group("UI/QML"     FILES ${UI_QML_SOURCE})
 source_group("Config" FILES ${CONFIGFILE})
 source_group("Examples"  FILES ${EXAMPLES})
+source_group("Base"   FILES ${HEADERS} ${SOURCES})
+source_group("Base/${FUNCTIONAL_GROUP1}" FILES ${MODULE_HEADERS} ${MODULE_SOURCES})
 
 # ------ OUTPUTS CONFIG ------
 message(STATUS "${BoldRed}------ ${PROJECT_TARGET} Tools Configuration ------${ColourReset}")
@@ -286,6 +315,7 @@ if(GUI_APPLICATION AND PROJECT_MAIN_TYPE STREQUAL "qt" OR PROJECT_MAIN_TYPE STRE
                 )
             find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick Core5Compat)
             find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick Core5Compat)
+            find_package(OpenGL REQUIRED)
         else()
             list(APPEND QT_MODULES Core Core5Compat)
             list(APPEND QT_MODULES_LINK
@@ -303,6 +333,7 @@ if(GUI_APPLICATION AND PROJECT_MAIN_TYPE STREQUAL "qt" OR PROJECT_MAIN_TYPE STRE
                 )
             find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
             find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
+            find_package(OpenGL REQUIRED)
         elseif(${PROJECT_MAIN_TYPE} STREQUAL "qtwidget")
             list(APPEND QT_MODULES Core Widgets)
             list(APPEND QT_MODULES_LINK
@@ -319,6 +350,7 @@ if(GUI_APPLICATION AND PROJECT_MAIN_TYPE STREQUAL "qt" OR PROJECT_MAIN_TYPE STRE
                 )
             find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Quick)
             find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Quick)
+            find_package(OpenGL REQUIRED)
         endif()
     endif()
 
@@ -371,6 +403,9 @@ if(GUI_APPLICATION AND PROJECT_MAIN_TYPE STREQUAL "qt" OR PROJECT_MAIN_TYPE STRE
             ${LIB_MODULES}
             ${QT_MODULES_LINK}
             ${OS_LIBS}
+            ${OpenCV_LIBS}
+            OpenGL::GL
+            OpenGL::GLU
         )
 
     #Extra Modules
@@ -385,6 +420,8 @@ if(GUI_APPLICATION AND PROJECT_MAIN_TYPE STREQUAL "qt" OR PROJECT_MAIN_TYPE STRE
         MACOSX_BUNDLE TRUE
         WIN32_EXECUTABLE TRUE
     )
+
+
 
 if(ANDROID)
     include(${ANDROID_SDK_ROOT}/android_openssl/CMakeLists.txt)

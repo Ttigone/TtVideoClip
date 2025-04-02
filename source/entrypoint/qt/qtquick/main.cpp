@@ -1,5 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQuickWindow>
 
 #include "video/TtVideoTask.h"
 
@@ -10,6 +11,15 @@ int main(int argc, char *argv[])
 #endif
 
     QGuiApplication app(argc, argv);
+
+    // 启用OpenGL调试输出
+    // QSurfaceFormat format;
+    // format.setOption(QSurfaceFormat::DebugContext);
+    // QSurfaceFormat::setDefaultFormat(format);
+
+    // Qt6中Qt Quick默认使用QSGRendererInterface::Direct3D11，因此之前Qt5的项目中使用FBO的例子在Qt6上无法正确渲染，因为框架不会主动调用createRenderer()方法！
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+
 
     // 注册到QML类型系统
     // 参数依次为：

@@ -9,7 +9,7 @@
 #include <QOpenGLTexture>
 #include <QQuickFramebufferObject>
 
-#include <opencv2/opencv.hpp>
+// #include <opencv2/opencv.hpp>
 
 // 自定义渲染器实现
 class CubeRenderer : public QQuickFramebufferObject::Renderer
@@ -76,6 +76,7 @@ class OpenGLCubeItem : public QQuickFramebufferObject
 public:
     OpenGLCubeItem()
     {
+        qDebug() << "1";
     }
 
     // 必须实现此方法创建渲染器
@@ -84,6 +85,12 @@ public:
     float rotationAngle() const { return m_angle; }
     void setRotationAngle(float angle)
     {
+        if (m_angle == angle) {
+            return;
+        }
+        m_angle = angle;
+        update(); // 触发重绘
+        emit rotationAngleChanged();
     }
 
 signals:

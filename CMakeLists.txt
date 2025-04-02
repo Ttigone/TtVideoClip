@@ -180,6 +180,10 @@ file(GLOB MODULE_SOURCES
     source/${FUNCTIONAL_GROUP1}/${SUFFIX_SOURCE}
 )
 
+file(GLOB RESOURCES
+    assets/${SUFFIX_QRC}
+)
+
 #file(GLOB EXAMPLES
 #     source/examples/${SUFFIX_HPPHEADER}
 #     source/examples/${SUFFIX_SOURCE}
@@ -245,6 +249,7 @@ file(GLOB SOURCESFILE
     ${EXAMPLES}
     ${MODULE_HEADERS}
     ${MODULE_SOURCES}
+    ${RESOURCES}
 )
 
 
